@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#8db7e8">
+  <title>你是哪一種校園生物？｜Campus Personality Lab</title>
+  <style>
+    :root {
+      --cream: #fff9ef;
+      --paper: #fffdf8;
+      --blue: #8db7e8;
+      --blue-dark: #42688f;
+      --blue-pale: #e8f1ff;
+      --pink: #f6dce4;
+      --pink-dark: #b96e86;
+      --ink: #35465c;
+      --muted: #738096;
+      --line: #e4e8ef;
+      --shadow: 0 14px 35px rgba(64, 91, 128, .12);
+      --radius: 24px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: 24px 14px 36px;
+      background:
+        radial-gradient(circle at 8% 8%, rgba(246,220,228,.7) 0 5px, transparent 6px),
+        radial-gradient(circle at 92% 20%, rgba(141,183,232,.45) 0 6px, transparent 7px),
+        var(--cream);
+      color: var(--ink);
+      font-family: "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif;
+      line-height: 1.65;
+    }
+
+    button { font: inherit; }
+    button:focus-visible { outline: 3px solid #e6a4b8; outline-offset: 3px; }
+    .app { width: min(100%, 760px); margin: 0 auto; }
+    .topline {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 12px; margin: 0 4px 16px;
+    }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; letter-spacing: .04em; }
+    .brand-mark {
+      display: grid; place-items: center; width: 42px; height: 42px;
+      border-radius: 15px; background: var(--blue-pale); font-size: 22px;
+      box-shadow: inset 0 0 0 1px #d6e5f8;
+    }
+    .brand small { display: block; color: var(--muted); font-size: 11px; font-weight: 600; letter-spacing: .12em; }
+    .mini-label {
+      border: 1px solid #d9e5f4; color: var(--blue-dark); background: rgba(255,255,255,.68);
+      border-radius: 999px; padding: 6px 12px; font-size: 12px; font-weight: 700;
+    }
+
+    .screen {
+      display: none; background: rgba(255,253,248,.95); border: 1px solid rgba(218,225,234,.9);
+      border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden;
+    }
+    .screen.active { display: block; animation: appear .32s ease both; }
+    @keyframes appear { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .hero { padding: clamp(26px, 6vw, 52px); text-align: center; }
+    .eyebrow {
+      display: inline-flex; align-items: center; gap: 7px; color: var(--blue-dark);
+      background: var(--blue-pale); border-radius: 999px; padding: 7px 13px;
+      font-size: 12px; font-weight: 800; letter-spacing: .09em;
+    }
+    h1, h2, h3, p { margin-top: 0; }
+    h1 { margin: 18px 0 12px; font-size: clamp(29px, 6vw, 46px); line-height: 1.25; letter-spacing: -.035em; }
+    .hero-title-accent { color: var(--pink-dark); }
+    .lead { max-width: 520px; margin: 0 auto 24px; color: var(--muted); }
+    .hero-art {
+      position: relative; display: flex; align-items: center; justify-content: center; gap: 15px;
+      width: min(100%, 400px); min-height: 155px; margin: 0 auto 25px;
+      border-radius: 26px; background: linear-gradient(135deg, #edf5ff, #fff0f4);
+      overflow: hidden;
+    }
+    .hero-art::before, .hero-art::after {
+      content: ""; position: absolute; width: 90px; height: 90px; border-radius: 50%;
+      background: rgba(255,255,255,.55);
+    }
+    .hero-art::before { top: -28px; left: -16px; }
+    .hero-art::after { bottom: -36px; right: -12px; }
+    .doodle { z-index: 1; font-size: clamp(36px, 8vw, 58px); filter: drop-shadow(0 5px 0 rgba(67,104,143,.08)); }
+    .doodle.main { font-size: clamp(54px, 12vw, 82px); transform: rotate(-7deg); }
+    .hero-note { z-index: 1; align-self: flex-end; margin-bottom: 20px; color: var(--blue-dark); font-size: 12px; font-weight: 800; }
+    .button-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+    .btn {
+      display: inline-flex; justify-content: center; align-items: center; gap: 8px;
+      min-height: 48px; padding: 12px 22px; border: 0; border-radius: 999px;
+      cursor: pointer; font-weight: 800; transition: transform .16s ease, box-shadow .16s ease, background .16s ease;
+    }
+    .btn:hover { transform: translateY(-2px); }
+    .btn-primary { color: #fff; background: var(--blue); box-shadow: 0 7px 0 #6e9bce; }
+    .btn-primary:hover { background: #7ba9de; box-shadow: 0 9px 0 #6e9bce; }
+    .btn-secondary { color: var(--blue-dark); background: #fff; border: 1px solid #d7e4f4; }
+    .btn-soft { color: var(--pink-dark); background: #fff0f4; border: 1px solid #f2d5df; }
+    .howto {
+      display: none; text-align: left; max-width: 500px; margin: 22px auto 0;
+      padding: 16px 18px; border-radius: 16px; background: #fff; border: 1px solid var(--line);
+    }
+    .howto.open { display: block; }
+    .howto ol { margin: 8px 0 0; padding-left: 22px; color: var(--muted); }
+
+    .quiz-head { padding: 24px clamp(20px, 5vw, 38px) 0; }
+    .quiz-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+    .quiz-label { color: var(--blue-dark); font-size: 13px; font-weight: 800; }
+    .question-count { color: var(--muted); font-size: 13px; font-weight: 700; white-space: nowrap; }
+    .progress-track { width: 100%; height: 9px; background: #e8edf4; border-radius: 999px; overflow: hidden; }
+    .progress-fill { height: 100%; width: 12.5%; background: linear-gradient(90deg, #8db7e8, #e7a9bd); border-radius: inherit; transition: width .25s ease; }
+    .quiz-body { padding: 26px clamp(20px, 5vw, 38px) 34px; }
+    .question-kicker { margin-bottom: 8px; color: var(--pink-dark); font-size: 12px; font-weight: 900; letter-spacing: .1em; }
+    .question-title { margin-bottom: 22px; font-size: clamp(22px, 4vw, 30px); line-height: 1.45; }
+    .options { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .option {
+      display: flex; align-items: flex-start; gap: 12px; min-height: 82px; width: 100%;
+      padding: 15px; text-align: left; color: var(--ink); background: #fff;
+      border: 1.5px solid var(--line); border-radius: 17px; cursor: pointer;
+      transition: border-color .16s ease, background .16s ease, transform .16s ease;
+    }
+    .option:hover { border-color: #a8c8ec; background: #f8fbff; transform: translateY(-2px); }
+    .option:disabled { cursor: default; opacity: .8; }
+    .option-letter {
+      flex: 0 0 30px; display: grid; place-items: center; width: 30px; height: 30px;
+      border-radius: 10px; background: var(--blue-pale); color: var(--blue-dark); font-weight: 900;
+    }
+    .option-text { padding-top: 2px; font-size: 14px; font-weight: 650; }
+    .quiz-foot { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 22px; }
+    .hint { color: var(--muted); font-size: 12px; }
+
+    .result { padding: clamp(22px, 5vw, 40px); }
+    .result-top { text-align: center; }
+    .result-label { color: var(--pink-dark); font-size: 12px; font-weight: 900; letter-spacing: .14em; }
+    .result-icon {
+      display: grid; place-items: center; width: 120px; height: 120px; margin: 15px auto;
+      border-radius: 36px; background: linear-gradient(145deg, #eaf3ff, #fff0f4);
+      font-size: 64px; box-shadow: inset 0 0 0 1px rgba(141,183,232,.2);
+    }
+    .result h2 { margin: 6px 0 8px; font-size: clamp(28px, 5vw, 38px); }
+    .result-subtitle { color: var(--blue-dark); font-weight: 800; }
+    .result-description { max-width: 540px; margin: 12px auto 22px; color: var(--muted); }
+    .result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 24px 0; }
+    .result-card { padding: 17px; border: 1px solid var(--line); border-radius: 17px; background: #fff; }
+    .result-card h3 { margin-bottom: 7px; font-size: 14px; color: var(--blue-dark); }
+    .result-card p { margin: 0; font-size: 14px; }
+    .result-tip { background: #fff0f4; border-color: #f3d6e0; }
+    .score-note { padding: 12px 15px; border-radius: 14px; background: #f2f7ff; color: var(--muted); font-size: 12px; text-align: center; }
+    .disclaimer { margin: 18px 0 0; color: var(--muted); font-size: 11px; text-align: center; }
+    .footer { padding: 18px 10px 0; text-align: center; color: #8a95a5; font-size: 11px; }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+
+    @media (max-width: 560px) {
+      body { padding: 14px 10px 24px; }
+      .topline { margin-bottom: 12px; }
+      .brand { font-size: 13px; }
+      .brand-mark { width: 37px; height: 37px; border-radius: 13px; }
+      .mini-label { padding: 5px 9px; font-size: 10px; }
+      .options { grid-template-columns: 1fr; gap: 9px; }
+      .option { min-height: 65px; padding: 12px; }
+      .option-text { font-size: 14px; }
+      .quiz-foot { align-items: flex-start; flex-direction: column; }
+      .quiz-foot .btn { width: 100%; }
+      .result-grid { grid-template-columns: 1fr; }
+      .hero-art { min-height: 130px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="topline">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">📚</span>
+        <span>Campus Personality Lab<small>校園人格研究所</small></span>
+      </div>
+      <span class="mini-label">8 題・約 2 分鐘</span>
+    </header>
+
+    <section id="homeScreen" class="screen active" aria-labelledby="homeTitle">
+      <div class="hero">
+        <span class="eyebrow">✦ YOUR CAMPUS STORY ✦</span>
+        <h1 id="homeTitle">你是哪一種<br><span class="hero-title-accent">校園生物？</span></h1>
+        <p class="lead">從上課、下課到分組報告，回答 8 道校園日常情境題，解鎖你的專屬校園人格！</p>
+        <div class="hero-art" aria-label="書本、鉛筆與星星的校園插畫">
+          <span class="doodle" aria-hidden="true">✏️</span>
+          <span class="doodle main" aria-hidden="true">🎒</span>
+          <span class="doodle" aria-hidden="true">📒</span>
+          <span class="hero-note">Find your type! ✦</span>
+        </div>
+        <div class="button-row">
+          <button id="startButton" class="btn btn-primary" type="button">開始測驗 <span aria-hidden="true">→</span></button>
+          <button id="howButton" class="btn btn-secondary" type="button" aria-expanded="false" aria-controls="howto">玩法說明</button>
+        </div>
+        <div id="howto" class="howto">
+          <strong>玩法超簡單！</strong>
+          <ol>
+            <li>依照你平常最可能的反應，選擇一個答案。</li>
+            <li>完成 8 題後，系統會統計你的選擇。</li>
+            <li>看看你是哪一種校園人格，也可以重新測驗！</li>
+          </ol>
+        </div>
+      </div>
+    </section>
+
+    <section id="quizScreen" class="screen" aria-labelledby="questionTitle">
+      <div class="quiz-head">
+        <div class="quiz-top">
+          <span class="quiz-label">✦ 校園日常小測驗</span>
+          <span id="questionCount" class="question-count">第 1／8 題</span>
+        </div>
+        <div class="progress-track" role="progressbar" aria-label="答題進度" aria-valuemin="0" aria-valuemax="8" aria-valuenow="0" id="progressBar">
+          <div id="progressFill" class="progress-fill"></div>
+        </div>
+      </div>
+      <div class="quiz-body">
+        <p id="questionKicker" class="question-kicker">QUESTION 01</p>
+        <h2 id="questionTitle" class="question-title">題目載入中……</h2>
+        <div id="options" class="options"></div>
+        <div class="quiz-foot">
+          <span id="answerHint" class="hint" aria-live="polite">選一個最像你的答案吧！</span>
+          <button id="backHomeButton" class="btn btn-secondary" type="button">回首頁</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="resultScreen" class="screen" aria-labelledby="resultName">
+      <div class="result">
+        <div class="result-top">
+          <p class="result-label">YOUR CAMPUS TYPE IS...</p>
+          <div id="resultIcon" class="result-icon" aria-hidden="true">📚</div>
+          <h2 id="resultName">認真學霸型</h2>
+          <p id="resultSubtitle" class="result-subtitle">The Master Planner</p>
+          <p id="resultDescription" class="result-description"></p>
+        </div>
+        <div class="result-grid">
+          <article class="result-card">
+            <h3>✦ 你的優點</h3>
+            <p id="resultStrength"></p>
+          </article>
+          <article class="result-card">
+            <h3>🎒 校園生存技能</h3>
+            <p id="resultSkill"></p>
+          </article>
+          <article class="result-card result-tip" style="grid-column: 1 / -1;">
+            <h3>💌 給你的趣味建議</h3>
+            <p id="resultAdvice"></p>
+          </article>
+        </div>
+        <div id="scoreNote" class="score-note"></div>
+        <div class="button-row" style="margin-top: 22px;">
+          <button id="restartButton" class="btn btn-primary" type="button">再測一次 ↻</button>
+          <button id="copyButton" class="btn btn-secondary" type="button">複製我的結果</button>
+          <button id="resultHomeButton" class="btn btn-soft" type="button">回首頁</button>
+        </div>
+        <p id="copyStatus" class="hint" role="status" aria-live="polite" style="text-align:center; margin: 12px 0 0;"></p>
+        <p class="disclaimer">本測驗僅供娛樂與自我探索，並非正式心理評估；每一種人格都有自己的特色！</p>
+      </div>
+    </section>
+
+    <footer class="footer">Made for school days, small ideas & big personalities ✦</footer>
+    <div id="liveMessage" class="sr-only" aria-live="polite"></div>
+  </main>
+
+  <script>
+    "use strict";
+
+    const personalities = {
+      A: {
+        name: "認真學霸型",
+        english: "The Master Planner",
+        icon: "📚",
+        description: "你喜歡把事情安排得有條有理。當別人還在想從哪裡開始時，你可能已經列好待辦清單，準備一步步完成目標。你不一定每次都最快，但很重視事情是否做得完整。",
+        strength: "有規劃能力、做事細心、責任感強。",
+        skill: "把混亂的考試週整理成一份清楚的讀書計畫。",
+        advice: "偶爾讓計畫留一點空白，臨時發現的新樂趣也值得探索。"
+      },
+      B: {
+        name: "能量節省型",
+        english: "The Energy Saver",
+        icon: "☁️",
+        description: "你深知能量有限，與其一直忙碌，不如找到舒服又有效率的節奏。你會在需要的時候休息，也會思考怎樣用更輕鬆的方式完成任務。",
+        strength: "懂得調整步調、重視休息、擅長尋找省力的方法。",
+        skill: "在忙碌的課表中，找到最適合自己的休息與專注節奏。",
+        advice: "休息很重要，但記得替重要任務設定開始時間，讓未來的自己更輕鬆。"
+      },
+      C: {
+        name: "社交人氣型",
+        english: "The Social Butterfly",
+        icon: "💬",
+        description: "校園生活有朋友一起，才更有趣！你喜歡交流、分享，也很容易讓平凡的下課時間變得熱鬧。你可能是主動開啟話題，讓大家自然聚在一起的人。",
+        strength: "善於溝通、容易建立連結、能帶動團體氣氛。",
+        skill: "讓原本不熟悉的同學也能自在地加入討論。",
+        advice: "熱鬧很好，有時也留一點安靜時間給自己，聽聽內心真正的想法。"
+      },
+      D: {
+        name: "最後一刻型",
+        english: "The Last-Minute Hero",
+        icon: "⏰",
+        description: "期限越接近，你越能感受到一股神祕的推進力。你擅長在有限時間內集中注意力，有時也能在緊要關頭找到快速解決問題的方法。",
+        strength: "臨場應變、能集中火力、遇到急事願意行動。",
+        skill: "面對突然出現的任務，迅速抓出最重要的部分。",
+        advice: "試著把大任務切成幾個小步驟，提早完成一點點，就能減少最後衝刺的壓力。"
+      },
+      E: {
+        name: "腦洞創意型",
+        english: "The Idea Generator",
+        icon: "💡",
+        description: "你的腦袋經常冒出不同的點子，別人想到一種方法，你可能已經想到另外三種。你喜歡嘗試新的玩法，也擅長把普通的事情變得更有趣。",
+        strength: "想像力豐富、思考彈性高、勇於嘗試新點子。",
+        skill: "替普通的分組報告加入有特色的主題與呈現方式。",
+        advice: "好點子值得被實現。選出一個最喜歡的想法，先做出小小的成果吧！"
+      },
+      F: {
+        name: "神隊友型",
+        english: "The Team MVP",
+        icon: "🤝",
+        description: "當團體需要有人幫忙時，你常常願意主動伸出援手。你在意的不只是自己的進度，也希望大家能一起完成目標。你的存在，會讓團隊合作更加順暢。",
+        strength: "重視合作、樂於助人、善於整合團隊進度。",
+        skill: "在分組報告中協助溝通、分工，讓大家朝同一個方向前進。",
+        advice: "你可以幫助別人，但不用什麼事情都自己扛。適時分工，也是一種團隊能力。"
+      }
+    };
+
+    const questions = [
+      {
+        text: "明天就要交報告，你會怎麼做？",
+        options: [
+          { text: "提早規劃，把架構與資料整理好。", type: "A" },
+          { text: "先休息一下，等精神比較好再開始。", type: "B" },
+          { text: "找同學一起討論，交換彼此的想法。", type: "C" },
+          { text: "先放著，最後一天再全力衝刺。", type: "D" }
+        ]
+      },
+      {
+        text: "下課只有十分鐘，你最想做什麼？",
+        options: [
+          { text: "整理剛才的筆記，確認自己有沒有聽懂。", type: "A" },
+          { text: "趴著休息，補充下一節課的能量。", type: "B" },
+          { text: "趁機找朋友聊天，分享今天的趣事。", type: "C" },
+          { text: "畫點塗鴉、記錄突然想到的新點子。", type: "E" }
+        ]
+      },
+      {
+        text: "班上要舉辦活動，你通常會？",
+        options: [
+          { text: "先列出流程、時間表與待辦清單。", type: "A" },
+          { text: "負責炒熱氣氛，邀請大家一起參加。", type: "C" },
+          { text: "想出有趣的主題，設計不一樣的玩法。", type: "E" },
+          { text: "主動幫忙分工，哪裡需要人手就去哪裡。", type: "F" }
+        ]
+      },
+      {
+        text: "老師突然宣布小考，你會？",
+        options: [
+          { text: "先回想重點，按順序整理可能考的內容。", type: "A" },
+          { text: "深呼吸、調整狀態，用有效率的方式複習。", type: "B" },
+          { text: "想起還沒讀的內容，開始進入極速衝刺模式。", type: "D" },
+          { text: "把內容編成口訣、圖像或奇怪的記憶法。", type: "E" }
+        ]
+      },
+      {
+        text: "朋友心情不好時，你會怎麼做？",
+        options: [
+          { text: "陪對方安靜休息，不勉強他立刻說話。", type: "B" },
+          { text: "找對方聊聊天，試著讓氣氛輕鬆一點。", type: "C" },
+          { text: "想個有趣的方法或活動，幫對方轉換心情。", type: "E" },
+          { text: "認真聽對方說話，並詢問需要什麼幫助。", type: "F" }
+        ]
+      },
+      {
+        text: "分組報告時，你最自然的角色是？",
+        options: [
+          { text: "整理資料、檢查內容是否完整。", type: "A" },
+          { text: "負責溝通協調，讓每個人都有參與感。", type: "C" },
+          { text: "在期限接近時快速完成自己負責的部分。", type: "D" },
+          { text: "幫忙整合進度，確保大家能一起完成。", type: "F" }
+        ]
+      },
+      {
+        text: "如果學校突然多出一個自由活動時段，你會？",
+        options: [
+          { text: "找個舒服的地方休息，享受難得的空檔。", type: "B" },
+          { text: "約朋友一起玩，順便認識其他同學。", type: "C" },
+          { text: "嘗試平常沒做過的事，看看會有什麼新發現。", type: "E" },
+          { text: "問問大家想做什麼，幫忙安排共同活動。", type: "F" }
+        ]
+      },
+      {
+        text: "期末週的你，最像哪一種狀態？",
+        options: [
+          { text: "按照讀書計畫逐項完成，掌握自己的進度。", type: "A" },
+          { text: "安排讀書與休息時間，避免把自己累壞。", type: "B" },
+          { text: "越接近考試越有動力，最後關頭集中火力。", type: "D" },
+          { text: "和同學互相提醒、分享重點，一起準備。", type: "F" }
+        ]
+      }
+    ];
+
+    const homeScreen = document.getElementById("homeScreen");
+    const quizScreen = document.getElementById("quizScreen");
+    const resultScreen = document.getElementById("resultScreen");
+    const startButton = document.getElementById("startButton");
+    const howButton = document.getElementById("howButton");
+    const howto = document.getElementById("howto");
+    const questionCount = document.getElementById("questionCount");
+    const questionKicker = document.getElementById("questionKicker");
+    const questionTitle = document.getElementById("questionTitle");
+    const optionsContainer = document.getElementById("options");
+    const progressFill = document.getElementById("progressFill");
+    const progressBar = document.getElementById("progressBar");
+    const answerHint = document.getElementById("answerHint");
+    const liveMessage = document.getElementById("liveMessage");
+    const backHomeButton = document.getElementById("backHomeButton");
+    const restartButton = document.getElementById("restartButton");
+    const copyButton = document.getElementById("copyButton");
+    const resultHomeButton = document.getElementById("resultHomeButton");
+    const copyStatus = document.getElementById("copyStatus");
+
+    let currentQuestion = 0;
+    let answers = [];
+    let scores = createEmptyScores();
+    let isAnswering = false;
+    let latestResult = null;
+
+    function createEmptyScores() {
+      return { A: 0, B: 0, C: 0, D: 0, E: 0, F: 0 };
+    }
+
+    function showScreen(screenToShow) {
+      [homeScreen, quizScreen, resultScreen].forEach(function(screen) {
+        screen.classList.toggle("active", screen === screenToShow);
+      });
+      copyStatus.textContent = "";
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function startQuiz() {
+      currentQuestion = 0;
+      answers = [];
+      scores = createEmptyScores();
+      isAnswering = false;
+      latestResult = null;
+      howto.classList.remove("open");
+      howButton.setAttribute("aria-expanded", "false");
+      renderQuestion();
+      showScreen(quizScreen);
+    }
+
+    function renderQuestion() {
+      const question = questions[currentQuestion];
+      isAnswering = false;
+      questionCount.textContent = "第 " + (currentQuestion + 1) + "／" + questions.length + " 題";
+      questionKicker.textContent = "QUESTION " + String(currentQuestion + 1).padStart(2, "0");
+      questionTitle.textContent = question.text;
+      const progress = (currentQuestion / questions.length) * 100;
+      progressFill.style.width = progress + "%";
+      progressBar.setAttribute("aria-valuenow", String(currentQuestion));
+      answerHint.textContent = "選一個最像你的答案吧！";
+      optionsContainer.replaceChildren();
+
+      question.options.forEach(function(option, index) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "option";
+        button.setAttribute("aria-label", String.fromCharCode(65 + index) + "：" + option.text);
+
+        const letter = document.createElement("span");
+        letter.className = "option-letter";
+        letter.textContent = String.fromCharCode(65 + index);
+
+        const text = document.createElement("span");
+        text.className = "option-text";
+        text.textContent = option.text;
+
+        button.append(letter, text);
+        button.addEventListener("click", function() {
+          chooseAnswer(option.type, button);
+        });
+        optionsContainer.appendChild(button);
+      });
+      liveMessage.textContent = "第 " + (currentQuestion + 1) + " 題：" + question.text;
+    }
+
+    function chooseAnswer(type, selectedButton) {
+      if (isAnswering || answers.length > currentQuestion) return;
+      isAnswering = true;
+
+      // 先鎖定所有選項，避免快速連點造成重複計分或跳題。
+      Array.from(optionsContainer.querySelectorAll("button")).forEach(function(button) {
+        button.disabled = true;
+      });
+      selectedButton.style.borderColor = "#8db7e8";
+      selectedButton.style.background = "#edf5ff";
+
+      answers.push(type);
+      scores[type] += 1;
+      answerHint.textContent = "已記錄答案，準備前往下一題……";
+      liveMessage.textContent = "答案已記錄";
+
+      // 短暫顯示選取狀態；此期間按鈕已停用。
+      window.setTimeout(function() {
+        if (currentQuestion < questions.length - 1) {
+          currentQuestion += 1;
+          renderQuestion();
+        } else {
+          progressFill.style.width = "100%";
+          progressBar.setAttribute("aria-valuenow", String(questions.length));
+          showResult();
+        }
+      }, 180);
+    }
+
+    function determineResult() {
+      const highestScore = Math.max.apply(null, Object.values(scores));
+      const tiedTypes = Object.keys(scores).filter(function(type) {
+        return scores[type] === highestScore;
+      });
+
+      if (tiedTypes.length === 1) return tiedTypes[0];
+
+      // 平手規則：在最高分人格之中，選擇最早出現在作答紀錄的類型。
+      for (let i = 0; i < answers.length; i += 1) {
+        if (tiedTypes.includes(answers[i])) return answers[i];
+      }
+
+      // 防禦性備援：正常完成八題時不會走到這裡。
+      return tiedTypes[0];
+    }
+
+    function showResult() {
+      latestResult = determineResult();
+      const result = personalities[latestResult];
+
+      document.getElementById("resultIcon").textContent = result.icon;
+      document.getElementById("resultName").textContent = result.name;
+      document.getElementById("resultSubtitle").textContent = result.english;
+      document.getElementById("resultDescription").textContent = result.description;
+      document.getElementById("resultStrength").textContent = result.strength;
+      document.getElementById("resultSkill").textContent = result.skill;
+      document.getElementById("resultAdvice").textContent = result.advice;
+
+      const highestScore = scores[latestResult];
+      document.getElementById("scoreNote").textContent =
+        "你的主要人格得分：" + highestScore + "／8 分。這是依照本次選擇計算的趣味結果，不代表固定或唯一的個性。";
+
+      showScreen(resultScreen);
+      liveMessage.textContent = "測驗完成，你的結果是" + result.name;
+    }
+
+    function returnHome() {
+      currentQuestion = 0;
+      answers = [];
+      scores = createEmptyScores();
+      isAnswering = false;
+      latestResult = null;
+      progressFill.style.width = "0%";
+      progressBar.setAttribute("aria-valuenow", "0");
+      showScreen(homeScreen);
+    }
+
+    function getShareText() {
+      if (!latestResult) return "";
+      const result = personalities[latestResult];
+      return "我的校園人格是「" + result.name + "」！\n" +
+        result.description + "\n" +
+        "我的優點：" + result.strength + "\n" +
+        "校園生存技能：" + result.skill + "\n" +
+        "趣味建議：" + result.advice + "\n" +
+        "— Campus Personality Lab 校園人格研究所";
+    }
+
+    function fallbackCopy(text) {
+      const textarea = document.createElement("textarea");
+      textarea.value = text;
+      textarea.setAttribute("readonly", "");
+      textarea.style.position = "fixed";
+      textarea.style.opacity = "0";
+      textarea.style.pointerEvents = "none";
+      document.body.appendChild(textarea);
+      textarea.select();
+      textarea.setSelectionRange(0, textarea.value.length);
+
+      let copied = false;
+      try {
+        copied = document.execCommand("copy");
+      } catch (error) {
+        copied = false;
+      }
+      textarea.remove();
+      return copied;
+    }
+
+    async function copyResult() {
+      const text = getShareText();
+      if (!text) {
+        copyStatus.textContent = "目前沒有可複製的結果，請先完成測驗。";
+        return;
+      }
+
+      copyStatus.textContent = "";
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(text);
+          copyStatus.textContent = "已複製結果！可以分享給朋友了。";
+          return;
+        }
+      } catch (error) {
+        // 若 Clipboard API 不可用或被拒絕，改用傳統複製方式。
+      }
+
+      if (fallbackCopy(text)) {
+        copyStatus.textContent = "已複製結果！可以分享給朋友了。";
+      } else {
+        // 最後備援：讓使用者手動選取並複製。
+        const textarea = document.createElement("textarea");
+        textarea.value = text;
+        textarea.setAttribute("aria-label", "請手動複製以下測驗結果");
+        textarea.style.width = "100%";
+        textarea.style.minHeight = "130px";
+        textarea.style.marginTop = "12px";
+        textarea.style.padding = "10px";
+        textarea.style.border = "1px solid #d7e4f4";
+        textarea.style.borderRadius = "12px";
+        textarea.style.color = "var(--ink)";
+        textarea.style.background = "#fff";
+        copyStatus.textContent = "瀏覽器未允許自動複製，請選取下方文字後手動複製。";
+        const oldFallback = document.getElementById("manualCopyArea");
+        if (oldFallback) oldFallback.remove();
+        textarea.id = "manualCopyArea";
+        resultScreen.querySelector(".result").appendChild(textarea);
+        textarea.focus();
+        textarea.select();
+      }
+    }
+
+    startButton.addEventListener("click", startQuiz);
+    howButton.addEventListener("click", function() {
+      const isOpen = howto.classList.toggle("open");
+      howButton.setAttribute("aria-expanded", String(isOpen));
+    });
+    backHomeButton.addEventListener("click", returnHome);
+    restartButton.addEventListener("click", startQuiz);
+    resultHomeButton.addEventListener("click", returnHome);
+    copyButton.addEventListener("click", copyResult);
+
+    // 題目資料完整性檢查：每題四個選項、人格代碼皆有效。
+    const validTypes = new Set(Object.keys(personalities));
+    questions.forEach(function(question, index) {
+      if (question.options.length !== 4) {
+        throw new Error("第 " + (index + 1) + " 題必須恰好有四個選項。");
+      }
+      question.options.forEach(function(option) {
+        if (!validTypes.has(option.type)) {
+          throw new Error("第 " + (index + 1) + " 題包含無效的人格代碼。");
+        }
+      });
+    });
+  </script>
+</body>
+</html>
